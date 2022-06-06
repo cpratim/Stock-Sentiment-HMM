@@ -7,7 +7,6 @@ from config import (
     transformed_dir,
     STOCKS
 )
-
 if __name__ == '__main__':
 
     if len(os.listdir(transformed_dir)) == 1:

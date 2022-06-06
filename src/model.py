@@ -1,3 +1,5 @@
+import os
+
 from src.markov import (
     Viterbi,
     build_emission_map,
@@ -7,8 +9,12 @@ from src.markov import (
     get_historical_walks,
     generate_random_walk,
 )
+from src.matrix import (
+    build_matrix,
+    save_matrix
+)
 import json
-from config import transformed_dir, STOCKS
+from config import transformed_dir, STOCKS, matrix_dir
 from src.merge import build_merged_df
 import numpy as np
 
@@ -42,6 +48,13 @@ def evaluate_model(stock, source, n_bins=5):
     sentiment_transition_map = build_transition_map(merged_df, target_col='sentiment_label')
     return_transition_map = build_transition_map(merged_df, target_col='return_label')
     emission_map = build_emission_map(merged_df)
+    if source not in os.listdir(matrix_dir):
+        os.mkdir(f'{matrix_dir}/{source}')
+    if stock not in os.listdir(f'{matrix_dir}/{source}'):
+        os.mkdir(f'{matrix_dir}/{source}/{stock}')
+    save_matrix(sentiment_transition_map, f'{matrix_dir}/{source}_{stock}_sentiments.csv')
+    save_matrix(return_transition_map, f'{matrix_dir}/{source}_{stock}_returns.csv')
+    save_matrix(emission_map, f'{matrix_dir}/{source}_{stock}_emission.csv')
     viterbi = Viterbi(emission_map, return_transition_map)
     labels = label_distribution[stock]["returns"]
     lag = 7
